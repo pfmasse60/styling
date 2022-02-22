@@ -1,0 +1,51 @@
+<div id='map' style='height:380px;'></div>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDquX_wBCyuGzBxWuiFh4Ipaxzd4wJY754"></script>
+<script>
+  var map = new google.maps.Map(document.getElementById('map'),
+    {
+      center: new google.maps.LatLng(51.505,   -0.09),
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      zoom: 11
+    });
+
+  infoWindow = new google.maps.InfoWindow();
+
+  const locationButton = document.createElement("button");
+
+  locationButton.textContent = "Pan to Current Location";
+  locationButton.classList.add("custom-map-control-button");
+  map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
+  locationButton.addEventListener("click", () => {
+    // Try HTML5 geolocation.
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+
+          infoWindow.setPosition(pos);
+          infoWindow.setContent("Location found.");
+          infoWindow.open(map);
+          map.setCenter(pos);
+        },
+        () => {
+          handleLocationError(true, infoWindow, map.getCenter());
+        }
+      );
+    } else {
+      // Browser doesn't support Geolocation
+      handleLocationError(false, infoWindow, map.getCenter());
+    }
+  });
+
+  var t = new Date().getTime();
+  var waqiMapOverlay = new google.maps.ImageMapType({
+    getTileUrl: function(coord,   zoom)   {
+      return 'https://tiles.aqicn.org/tiles/usepa-aqi/' + zoom + "/" + coord.x + "/" + coord.y + ".png?token=3f56311483ca3b17d7ac4645526a4b5ef9a65586";
+    },
+    name: "Air Quality",
+  });
+    map.overlayMapTypes.insertAt(0,waqiMapOverlay);
+</script>
